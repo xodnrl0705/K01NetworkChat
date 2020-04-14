@@ -43,7 +43,7 @@ public class MultiServer {
 				out.println("> "+ name +"님이 접속했습니다.");
 			}
 			/*
-			두번째 베세지부터는 실제 대화내용이므로 읽어와서 로그로 출력하고
+			두번째 메세지부터는 실제 대화내용이므로 읽어와서 로그로 출력하고
 			동시에 클라이언트로 Echo한다.
 			*/
 			while(in != null) {

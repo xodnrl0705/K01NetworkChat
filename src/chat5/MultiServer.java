@@ -15,10 +15,8 @@ public class MultiServer {
 	public MultiServer() {
 		//실행부 없음
 	}
-	
 	//서버 초기화
 	public void init() {
-		
 		try {
 			serverSocket = new ServerSocket(9999);
 			System.out.println("서버가 시작되었습니다.");

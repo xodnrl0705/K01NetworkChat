@@ -5,11 +5,14 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Scanner;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 public class MultiServer extends ConnectDB{
 	
@@ -64,6 +67,7 @@ public class MultiServer extends ConnectDB{
 		MultiServer ms = new MultiServer();
 		ms.init();
 	}
+
 	
 	//접속된 모든 클라이언트에게 메세지를 전달하는 역항의 메소드
 	public void sendAllMsg(String name, String msg) {
@@ -82,7 +86,7 @@ public class MultiServer extends ConnectDB{
 				없는경우에는 메세지만 클라이언트로 전달한다.
 				 */
 				if(name.equals("")) {
-					it_out.println(msg);
+					it_out.println(URLEncoder.encode(msg,"UTF-8"));
 				}
 				else {
 					it_out.println("["+name+"]:"+msg);
@@ -97,6 +101,35 @@ public class MultiServer extends ConnectDB{
 		}
 	}
 	
+	//메세지를 전달하는 역항의 메소드(한번귓속말)
+//	public void sendMsg(String[] arr,String name) {
+//		
+//		try {
+//			//각 클라이언트의 PrintWriter객체를 얻어온다.
+//			PrintWriter it_out = (PrintWriter) clientMap.get(arr[1]);
+//
+//			if(arr[1].equals("")) {
+//				for(int i=2; i<arr.length;i++) {
+//					it_out.println(URLEncoder.encode(arr[i],"UTF-8"));
+//				}
+//			}
+//			else {
+//				it_out.print("["+name+"]:");
+//				for(int i=2; i<arr.length;i++) {
+//					it_out.print(arr[i]+" ");
+//				}
+//				it_out.println();
+//			}
+//
+//
+//		}
+//		catch (Exception e) {
+//			System.out.println("예외:"+e);
+//
+//		}
+//	}
+	
+	
 	//내부클래스
 	class MultiServerT extends Thread{
 		
@@ -110,7 +143,7 @@ public class MultiServer extends ConnectDB{
 			this.socket = socket;
 			try {
 				out = new PrintWriter(this.socket.getOutputStream(),true);
-				in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+				in = new BufferedReader(new InputStreamReader(this.socket.getInputStream(),"UTF-8"));
 						
 			}
 			catch (Exception e) {
@@ -124,10 +157,12 @@ public class MultiServer extends ConnectDB{
 			String name = "";
 			//메세지 저장용 변수
 			String s = "";
-			
+			//귓속말상대 저장용 변수
+			String m = "";
 			try {
 				//클라이언트의 이름을 읽어와서 저장
 				name = in.readLine();
+				name = URLDecoder.decode(name,"UTF-8");
 				//접속한 클라이언트에게 새로운 사용자의 입장을 알림.
 				//접속자를 제외한 나머지 클라이언트만 입장메세지를 받는다.
 				sendAllMsg("",name+ "님이 입장하셨습니다.");
@@ -142,10 +177,71 @@ public class MultiServer extends ConnectDB{
 				while(in!=null) {
 					
 					s = in.readLine();
-					if(s==null)
+					s = URLDecoder.decode(s,"UTF-8");
+					//읽어온 메세지를 콘솔에 출력하고...
+					System.out.println(name+ " >> " + s);
+					
+					if(s==null) {
 						break;
+					}
+					else if(s.charAt(0)=='/') {
+						
+						StringTokenizer st = new StringTokenizer(s);
+						String [] arr = new String[st.countTokens()];
+						int i = 0;
+						while(st.hasMoreElements()){
+							arr[i++] = st.nextToken();
+						}
+						switch (arr[0]) {
+						
+						case "/list":
+							
+							PrintWriter listOut = (PrintWriter) clientMap.get(name);
+							Set<String> keys = clientMap.keySet();
+							listOut.println("채팅방안에 사용자 목록");
+							for(String key : keys) {
+								listOut.println(key);
+							}
+							break;
+						case "/to":
+							PrintWriter toOut = (PrintWriter) clientMap.get(name);
+							
+							toOut.println("(1)귓속말고정 (2)");
+							toOut.println("(고정)귓속말상대를 누구로 하시겠습니까?");
+							
+							m = in.readLine();
+							
+							PrintWriter it_out = (PrintWriter) clientMap.get(arr[1]);
+
+							if(arr[1].equals("")) {
+								for(int j=2; j<arr.length;j++) {
+									it_out.println(URLEncoder.encode(arr[j],"UTF-8"));
+								}
+							}
+							else {
+								it_out.print("["+name+"]:");
+								for(int j=2; j<arr.length;j++) {
+									it_out.print(arr[j]+" ");
+								}
+								it_out.println();
+							}
+
+							break;
+							
+							
+
+						default:
+							break;
+						}
+					}
+					else{
+						
+						//클라이언트에게 Echo해준다.
+						sendAllMsg(name,s);
+					
+					}
 					//**db처리는 여기서 진행
-					String query = "INSERT INTO chat_tb VALUES (seq_chat.nextval,?,?,sysdate)";
+					String query = "INSERT INTO chatting_tb VALUES (seq_chat.nextval,?,?,TO_CHAR(sysdate,'YYYY-MM-DD/HH:MI:SS'))";
 					
 					psmt = con.prepareStatement(query);
 					
@@ -153,15 +249,11 @@ public class MultiServer extends ConnectDB{
 					psmt.setString(2, s);
 					
 					psmt.executeUpdate();
-					//읽어온 메세지를 콘솔에 출력하고...
-					System.out.println(name+ " >> " + s);
-					//클라이언트에게 Echo해준다.
-					sendAllMsg(name,s);
-					
+
 				}
 			}
 			catch (Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 			finally {
 				/*
