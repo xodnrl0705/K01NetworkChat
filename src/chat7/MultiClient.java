@@ -3,10 +3,8 @@ package chat7;
 import java.net.Socket;
 import java.util.Scanner;
 
-import chat4.Receiver;
-
-public class MultiClient {
-
+public class MultiClient{
+	
 	public static void main(String[] args) {
 
 		System.out.print("이름을 입력하세요:");
@@ -17,9 +15,8 @@ public class MultiClient {
 		//PrintWriter out = null;
 		//Receiver가 기능을 가져가므로 여기서는 필요없음
 		//BufferedReader in = null;
-
 		try {
-			
+	
 			String ServerIP = "localhost";
 			if(args.length>0) {
 				ServerIP = args[0];
@@ -36,6 +33,7 @@ public class MultiClient {
 			sender.start();
 
 		}
+
 		catch (Exception e) {
 			System.out.println("예외발생[MultiClient]"+e);
 		}
