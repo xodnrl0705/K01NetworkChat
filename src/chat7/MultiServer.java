@@ -102,32 +102,32 @@ public class MultiServer extends ConnectDB{
 	}
 	
 	//메세지를 전달하는 역항의 메소드(한번귓속말)
-//	public void sendMsg(String[] arr,String name) {
-//		
-//		try {
-//			//각 클라이언트의 PrintWriter객체를 얻어온다.
-//			PrintWriter it_out = (PrintWriter) clientMap.get(arr[1]);
-//
-//			if(arr[1].equals("")) {
-//				for(int i=2; i<arr.length;i++) {
-//					it_out.println(URLEncoder.encode(arr[i],"UTF-8"));
-//				}
-//			}
-//			else {
-//				it_out.print("["+name+"]:");
-//				for(int i=2; i<arr.length;i++) {
-//					it_out.print(arr[i]+" ");
-//				}
-//				it_out.println();
-//			}
-//
-//
-//		}
-//		catch (Exception e) {
-//			System.out.println("예외:"+e);
-//
-//		}
-//	}
+	public void sendMsg(String[] arr,String name) {
+		
+		try {
+			//각 클라이언트의 PrintWriter객체를 얻어온다.
+			PrintWriter it_out = (PrintWriter) clientMap.get(arr[1]);
+
+			if(arr[1].equals("")) {
+				for(int i=2; i<arr.length;i++) {
+					it_out.println(URLEncoder.encode(arr[i],"UTF-8"));
+				}
+			}
+			else {
+				it_out.print("["+name+"]:");
+				for(int i=2; i<arr.length;i++) {
+					it_out.print(arr[i]+" ");
+				}
+				it_out.println();
+			}
+
+
+		}
+		catch (Exception e) {
+			System.out.println("예외:"+e);
+
+		}
+	}
 	
 	
 	//내부클래스
@@ -204,33 +204,43 @@ public class MultiServer extends ConnectDB{
 							}
 							break;
 						case "/to":
-							PrintWriter toOut = (PrintWriter) clientMap.get(name);
-							
-							toOut.println("(1)귓속말고정 (2)");
-							toOut.println("(고정)귓속말상대를 누구로 하시겠습니까?");
-							
-							m = in.readLine();
-							
-							PrintWriter it_out = (PrintWriter) clientMap.get(arr[1]);
-
-							if(arr[1].equals("")) {
-								for(int j=2; j<arr.length;j++) {
-									it_out.println(URLEncoder.encode(arr[j],"UTF-8"));
-								}
+							if(i>=3) {
+							sendMsg(arr, name);	
 							}
 							else {
-								it_out.print("["+name+"]:");
-								for(int j=2; j<arr.length;j++) {
-									it_out.print(arr[j]+" ");
+								
+								PrintWriter static_out = (PrintWriter) clientMap.get(arr[1]);
+								static_out.println("["+name+"]"+ "님께서 귓속말을 보냅니다");
+								while(true) {
+									
+									s = in.readLine();
+									s = URLDecoder.decode(s,"UTF-8");
+									if(s.equals("/q")) {
+										static_out.println("["+name+"]:"+ "께서 귓속말을 그만두셨습니다.");
+										static_out = (PrintWriter) clientMap.get(name);
+										static_out.println("귓속말을 종료합니다.");
+										break;
+									}
+													
+									
+									if(arr[1].equals("")) {
+										static_out.println(URLEncoder.encode(s,"UTF-8"));
+									}
+									else {
+										static_out.println("["+name+"]:"+s);
+									}
+									
 								}
-								it_out.println();
+								
 							}
+							
 
 							break;
 							
 							
 
 						default:
+							
 							break;
 						}
 					}
