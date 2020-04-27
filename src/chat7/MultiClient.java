@@ -58,7 +58,6 @@ public class MultiClient{
 						
 						System.out.println("권한:(1)방장/(2)일반사용자");
 						control = scanner.nextLine();
-						scanner.nextLine();
 						if(control.equals("1")) {
 							System.out.print("비밀번호를 입력하시오:");
 							String divide = scanner.nextLine();
@@ -77,6 +76,8 @@ public class MultiClient{
 						}
 						else {
 							System.out.println("잘못입력하셨습니다.");
+							System.out.println("다시 입력하세요");
+							System.out.println();
 						}
 					}
 					
