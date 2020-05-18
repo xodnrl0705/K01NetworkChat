@@ -75,6 +75,7 @@ public class MultiServer {
 				System.out.println("예외1:"+e);
 				//e.printStackTrace();
 			}
+			
 		}
 	}
 }
